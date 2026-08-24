@@ -40,6 +40,7 @@ class BkashServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Tiash\LaravelBkash\Console\InstallCommand::class,
+                \Tiash\LaravelBkash\Console\TestSandboxCommand::class,
             ]);
         }
 
@@ -54,8 +55,10 @@ class BkashServiceProvider extends ServiceProvider
             ? "https://tokenized.sandbox.bka.sh/{$app['config']['bkash']['api_version']}/tokenized"
             : "https://tokenized.pay.bka.sh/{$app['config']['bkash']['api_version']}/tokenized";
 
+        $this->app->singleton(ResponseNormalizer::class);
+
         $this->app->singleton(BkashClientInterface::class, function ($app) use ($baseUrl) {
-            return new GuzzleClient($baseUrl($app), $app['config']['bkash']['http'], new ResponseNormalizer());
+            return new GuzzleClient($baseUrl($app), $app['config']['bkash']['http'], $app[ResponseNormalizer::class]);
         });
 
         $this->app->singleton(Credentials::class, function ($app) {
@@ -64,7 +67,7 @@ class BkashServiceProvider extends ServiceProvider
 
         $this->app->singleton(TokenCache::class, function ($app) {
             $cacheStore = $app['config']['bkash']['cache']['store'] ?? null;
-            $cache = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache'];
+            $cache = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
             $ttlBuffer = $app['config']['bkash']['cache']['ttl_buffer'] ?? 300;
             return new TokenCache($cache, $ttlBuffer);
         });
@@ -80,20 +83,22 @@ class BkashServiceProvider extends ServiceProvider
 
         $this->app->singleton(IdempotencyLock::class, function ($app) {
             $cacheStore = $app['config']['bkash']['cache']['store'] ?? null;
-            $cache = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache'];
+            $cache = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
             return new IdempotencyLock($cache);
         });
 
         $this->app->singleton(SnsCertificateStore::class, function ($app) {
             $cacheStore = $app['config']['bkash']['cache']['store'] ?? null;
-            $cache = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache'];
+            $cache = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
             return new SnsCertificateStore($cache);
         });
 
         $this->app->singleton(SnsSignatureVerifier::class, function ($app) {
+            $cacheStore = $app['config']['bkash']['cache']['store'] ?? null;
+            $cache = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
             return new SnsSignatureVerifier(
                 $app[SnsCertificateStore::class],
-                $app['cache']->store($app['config']['bkash']['cache']['store'] ?? null),
+                $cache,
             );
         });
 

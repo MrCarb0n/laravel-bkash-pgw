@@ -7,3 +7,9 @@
 /.idea
 /.vscode
 *.log
+
+# project specific
+PLAN.md
+.php-cs-fixer.cache
+.phpstan-cache/
+.DS_Store

@@ -38,12 +38,12 @@ class ResponseNormalizerTest extends TestCase
     {
         try {
             $this->normalizer->normalize(new Response(200, [], json_encode([
-                'errorCode'    => '2051',
+                'errorCode'    => '9999',
                 'errorMessage' => 'Invalid app secret',
             ])));
             $this->fail('Expected ApiException');
         } catch (ApiException $e) {
-            $this->assertSame('2051', $e->getErrorCode());
+            $this->assertSame('9999', $e->getErrorCode());
             $this->assertSame('Invalid app secret', $e->getMessage());
         }
     }
@@ -74,5 +74,59 @@ class ResponseNormalizerTest extends TestCase
         $this->expectException(NetworkException::class);
 
         $this->normalizer->normalize(new Response(503, [], 'unavailable'));
+    }
+
+    public function test_client_error_400_raises_api_exception(): void
+    {
+        $this->expectException(ApiException::class);
+        $this->expectExceptionMessage('Invalid request body');
+
+        $this->normalizer->normalize(new Response(400, [], json_encode([
+            'errorCode'    => '2025',
+            'errorMessage' => 'Invalid request body',
+        ])));
+    }
+
+    public function test_client_error_401_raises_api_exception(): void
+    {
+        $this->expectException(ApiException::class);
+        $this->expectExceptionMessage('Invalid app Token');
+
+        $this->normalizer->normalize(new Response(401, [], json_encode([
+            'errorCode'    => '2079',
+            'errorMessage' => 'Invalid app Token',
+        ])));
+    }
+
+    public function test_client_error_404_raises_api_exception(): void
+    {
+        $this->expectException(ApiException::class);
+        $this->expectExceptionMessage('Invalid Payment ID');
+
+        $this->normalizer->normalize(new Response(404, [], json_encode([
+            'errorCode'    => '2002',
+            'errorMessage' => 'Invalid Payment ID',
+        ])));
+    }
+
+    public function test_client_error_429_raises_api_exception(): void
+    {
+        $this->expectException(ApiException::class);
+        $this->expectExceptionMessage('Rate limit exceeded');
+
+        $this->normalizer->normalize(new Response(429, [], json_encode([
+            'errorCode'    => '2104',
+            'errorMessage' => 'Rate limit exceeded',
+        ])));
+    }
+
+    public function test_client_error_without_error_code_uses_http_code(): void
+    {
+        $this->expectException(ApiException::class);
+        $this->expectExceptionCode(400);
+
+        $this->normalizer->normalize(new Response(400, [], json_encode([
+            'errorMessage' => 'Some error',
+        ])));
     }
 }

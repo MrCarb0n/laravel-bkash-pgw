@@ -1,12 +1,15 @@
 {
-    "name": "tiash/laravel-bkash",
+    "name": "mrcarb0n/laravel-bkash-pgw",
     "description": "Complete bKash payment integration for Laravel (Tokenized Checkout, Agreements, B2C Payouts, Webhooks)",
     "type": "library",
+    "provides": {
+        "php-laravel-bkash-pgw": "*"
+    },
     "license": "MIT",
     "authors": [
         {
-            "name": "tiash",
-            "email": "tiash@example.com"
+            "name": "MrCarb0n",
+            "email": "tiash97@yahoo.com"
         }
     ],
     "minimum-stability": "dev",
@@ -29,7 +32,7 @@
         "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0",
         "phpunit/phpunit": "^9.0|^10.0",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "phpstan/phpstan": "^1.10"
+        "phpstan/phpstan": "^2.2"
     },
     "autoload": {
         "psr-4": {

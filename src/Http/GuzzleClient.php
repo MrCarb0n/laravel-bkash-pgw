@@ -13,11 +13,13 @@ class GuzzleClient implements BkashClientInterface
     private $client;
     private ResponseNormalizer $normalizer;
     private int $retry;
+    private int $retryDelay;
 
     public function __construct(string $baseUrl, array $httpConfig, ResponseNormalizer $normalizer, ?HandlerStack $handler = null)
     {
-        $this->normalizer = $normalizer;
-        $this->retry      = $httpConfig['retry'] ?? 2;
+        $this->normalizer  = $normalizer;
+        $this->retry       = $httpConfig['retry'] ?? 2;
+        $this->retryDelay  = $httpConfig['retry_delay'] ?? 100000; // microseconds
 
         $options = [
             'base_uri'        => rtrim($baseUrl, '/') . '/',
@@ -52,7 +54,17 @@ class GuzzleClient implements BkashClientInterface
             $options['json'] = $payload;
         }
 
-        $maxAttempts = $method === 'GET' ? $this->retry + 1 : 1;
+        // Retry on GET and idempotent POST endpoints
+        $idempotentEndpoints = [
+            '/checkout/execute',
+            '/checkout/payment/status',
+            '/checkout/general/searchTransaction',
+            '/checkout/agreement/execute',
+            '/checkout/agreement/status',
+        ];
+        $isIdempotent = $method === 'GET' || in_array($endpoint, $idempotentEndpoints, true);
+
+        $maxAttempts = $isIdempotent ? $this->retry + 1 : 1;
 
         for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
             try {
@@ -66,7 +78,7 @@ class GuzzleClient implements BkashClientInterface
                         $e
                     );
                 }
-                usleep(100000 * $attempt);
+                usleep($this->retryDelay * $attempt);
             }
         }
 

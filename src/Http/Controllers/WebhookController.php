@@ -9,6 +9,7 @@ use Tiash\LaravelBkash\Events\PaymentFailed;
 use Tiash\LaravelBkash\Events\RefundCompleted;
 use Tiash\LaravelBkash\Events\WebhookReceived;
 use Tiash\LaravelBkash\Security\SnsSignatureVerifier;
+use Tiash\LaravelBkash\Exceptions\SignatureException;
 use Throwable;
 
 class WebhookController extends Controller
@@ -25,6 +26,8 @@ class WebhookController extends Controller
     {
         try {
             $result = $this->verifier->verify($request->getContent());
+        } catch (SignatureException $e) {
+            return response('Invalid webhook: ' . $e->getMessage(), 400);
         } catch (Throwable $e) {
             return response('Invalid webhook: ' . $e->getMessage(), 400);
         }
@@ -54,8 +57,17 @@ class WebhookController extends Controller
 
     private function confirmSubscription(string $subscribeUrl): void
     {
-        if (str_starts_with($subscribeUrl, 'https://') && str_contains($subscribeUrl, '.amazonaws.com')) {
-            @file_get_contents($subscribeUrl);
+        if (!str_starts_with($subscribeUrl, 'https://') || !str_contains($subscribeUrl, '.amazonaws.com')) {
+            return;
         }
+
+        $context = stream_context_create([
+            'http' => [
+                'method'  => 'GET',
+                'timeout' => 10,
+            ],
+        ]);
+
+        @file_get_contents($subscribeUrl, false, $context);
     }
 }

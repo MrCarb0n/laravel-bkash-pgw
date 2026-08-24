@@ -9,7 +9,8 @@ class ApiException extends BkashException
 
     public function __construct(string $message, string $errorCode, array $rawResponse = [])
     {
-        parent::__construct($message);
+        $code = is_numeric($errorCode) ? (int) $errorCode : 0;
+        parent::__construct($message, $code);
         $this->errorCode   = $errorCode;
         $this->rawResponse = $rawResponse;
     }

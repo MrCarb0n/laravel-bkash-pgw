@@ -85,6 +85,12 @@ class SnsSignatureVerifier
             OPENSSL_ALGO_SHA1
         );
 
+        // openssl_verify returns 1 on success, 0 on failure, -1 on error
+        if ($verified === -1) {
+            $error = openssl_error_string();
+            throw new SignatureException('OpenSSL error during signature verification: ' . ($error ?: 'unknown'));
+        }
+
         if ($verified !== 1) {
             throw new SignatureException('SNS signature verification failed');
         }

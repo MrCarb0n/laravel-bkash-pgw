@@ -3,7 +3,6 @@
 namespace Tiash\LaravelBkash\Auth;
 
 use Illuminate\Contracts\Cache\Repository;
-use Tiash\LaravelBkash\Exceptions\ApiException;
 
 class TokenCache
 {
@@ -41,5 +40,18 @@ class TokenCache
     {
         $expiresIn = $tokenData['expires_in'] ?? 3600;
         return max(60, (int) $expiresIn - $this->ttlBuffer);
+    }
+
+    /** Simple lock for token acquisition (boolean value, short TTL). */
+    public function lock(string $key, int $ttl = 10): bool
+    {
+        $lockKey = "bkash_token_lock_{$key}";
+        // add() only sets if key doesn't exist (atomic in most cache drivers)
+        return $this->cache->add($lockKey, true, $ttl);
+    }
+
+    public function unlock(string $key): void
+    {
+        $this->cache->forget("bkash_token_lock_{$key}");
     }
 }

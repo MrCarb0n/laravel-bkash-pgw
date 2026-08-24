@@ -19,15 +19,15 @@ class IdempotencyLock
     {
         $lockKey = "bkash_idempotent_{$key}";
 
-        if ($this->cache->has($lockKey)) {
+        // Use atomic add() - only succeeds if key doesn't exist
+        if (!$this->cache->add($lockKey, true, $this->ttl)) {
             throw new \RuntimeException("Idempotency key {$key} already used");
         }
-
-        $this->cache->put($lockKey, true, $this->ttl);
 
         try {
             return $callback();
         } catch (\Throwable $e) {
+            // On failure, remove lock so it can be retried
             $this->cache->forget($lockKey);
             throw $e;
         }
@@ -37,11 +37,7 @@ class IdempotencyLock
     {
         $lockKey = "bkash_dedup_{$key}";
 
-        if ($this->cache->has($lockKey)) {
-            return false;
-        }
-
-        $this->cache->put($lockKey, true, $this->ttl);
-        return true;
+        // Atomic check-and-mark using add()
+        return $this->cache->add($lockKey, true, $this->ttl);
     }
 }

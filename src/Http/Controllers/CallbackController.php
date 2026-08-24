@@ -26,14 +26,15 @@ class CallbackController extends Controller
     {
         $status    = $request->query('status');
         $paymentId = $request->query('paymentID');
+        $account   = $request->query('account', 'default');
 
         if (!$paymentId) {
             return $this->failure('Missing paymentID');
         }
 
-        $appSecret = $this->credentials->get('default')['app_secret'];
+        $appSecret = $this->credentials->get($account)['app_secret'] ?? '';
 
-        if (!CallbackSignature::validate($request->query->all(), $appSecret)) {
+        if (!$appSecret || !CallbackSignature::validate($request->query->all(), $appSecret)) {
             return $this->failure('Invalid callback signature');
         }
 
@@ -42,7 +43,7 @@ class CallbackController extends Controller
         }
 
         try {
-            $response = $this->paymentApi->execute($paymentId);
+            $response = $this->paymentApi->execute($paymentId, $account);
         } catch (\Throwable $e) {
             return $this->failure($e->getMessage());
         }

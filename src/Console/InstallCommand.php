@@ -39,7 +39,7 @@ class InstallCommand extends Command
         $this->line('     - BKASH_PASSWORD');
         $this->line('  4. Set BKASH_CALLBACK_URL to your public HTTPS endpoint');
         $this->line('  5. For production: IP whitelist your server with bKash');
-        $this->line('  6. Run: php artisan bkash:test-sandbox (after Phase 1 complete)');
+        $this->line('  6. Run: php artisan bkash:test-sandbox to verify connectivity');
         $this->newLine();
 
         $this->warn('⚠️  Production requires:');

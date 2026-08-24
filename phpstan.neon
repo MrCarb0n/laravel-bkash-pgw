@@ -4,6 +4,3 @@ parameters:
         - src
     excludePaths:
         - tests
-    checkMissingIterableValueType: false
-    ignoreErrors:
-        - identifier: missingType.iterableValue
