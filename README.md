@@ -103,6 +103,14 @@ vendor/bin/phpstan analyse --no-progress         # static analysis
 php artisan bkash:test-sandbox                   # live sandbox smoke test
 ```
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
+## Security
+
+If you find a vulnerability, open a private security advisory instead of a public issue.
+
 ## License
 
-MIT — MrCarb0n
+MIT — see [LICENSE](LICENSE).
