@@ -54,6 +54,10 @@
             }
         }
     },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --no-progress"
+    },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
