@@ -6,6 +6,11 @@ return [
 
     'api_version' => 'v1.2.0-beta',
 
+    'base_urls' => [
+        'sandbox'    => env('BKASH_SANDBOX_BASE_URL', 'https://tokenized.sandbox.bka.sh'),
+        'production' => env('BKASH_PRODUCTION_BASE_URL', 'https://tokenized.pay.bka.sh'),
+    ],
+
     'callback_url' => env('BKASH_CALLBACK_URL'),
 
     'accounts' => [

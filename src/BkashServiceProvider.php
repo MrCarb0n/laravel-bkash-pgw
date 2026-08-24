@@ -51,9 +51,17 @@ class BkashServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/bkash.php', 'bkash');
 
-        $baseUrl = fn ($app) => $app['config']['bkash']['sandbox']
-            ? "https://tokenized.sandbox.bka.sh/{$app['config']['bkash']['api_version']}/tokenized"
-            : "https://tokenized.pay.bka.sh/{$app['config']['bkash']['api_version']}/tokenized";
+        $baseUrl = function ($app) {
+            $cfg = $app['config']['bkash'];
+            $env = $cfg['sandbox'] ? 'sandbox' : 'production';
+
+            // Fallback keeps configs published before base_urls existed working.
+            $host = rtrim($cfg['base_urls'][$env] ?? ($cfg['sandbox']
+                ? 'https://tokenized.sandbox.bka.sh'
+                : 'https://tokenized.pay.bka.sh'), '/');
+
+            return "{$host}/{$cfg['api_version']}/tokenized";
+        };
 
         $this->app->singleton(ResponseNormalizer::class);
 
