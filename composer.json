@@ -1,6 +1,6 @@
 {
     "name": "mrcarb0n/laravel-bkash-pgw",
-    "description": "Complete bKash payment integration for Laravel (Tokenized Checkout, Agreements, B2C Payouts, Webhooks)",
+    "description": "bKash PGW (Tokenized Checkout) integration for Laravel: payments, refunds, agreements, payouts, webhooks",
     "type": "library",
     "provides": {
         "php-laravel-bkash-pgw": "*"

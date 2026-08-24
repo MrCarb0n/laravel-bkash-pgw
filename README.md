@@ -1,6 +1,6 @@
 # laravel-bkash-pgw
 
-bKash Tokenized Checkout integration for Laravel — payments, refunds, agreements, payouts, webhooks.
+bKash PGW (Tokenized Checkout) integration for Laravel — payments, refunds, agreements, payouts, webhooks.
 
 [![Packagist Version](https://img.shields.io/packagist/v/mrcarb0n/laravel-bkash-pgw.svg)](https://packagist.org/packages/mrcarb0n/laravel-bkash-pgw)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/mrcarb0n/laravel-bkash-pgw.svg)](https://packagist.org/packages/mrcarb0n/laravel-bkash-pgw)
