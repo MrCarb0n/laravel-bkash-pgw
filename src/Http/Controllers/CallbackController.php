@@ -5,23 +5,23 @@ namespace Tiash\LaravelBkash\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Tiash\LaravelBkash\Api\TokenizedPaymentApi;
-use Tiash\LaravelBkash\Auth\Credentials;
 use Tiash\LaravelBkash\Events\PaymentCompleted;
 use Tiash\LaravelBkash\Events\PaymentFailed;
-use Tiash\LaravelBkash\Security\CallbackSignature;
 
 class CallbackController extends Controller
 {
     private $paymentApi;
-    private $credentials;
 
-    public function __construct(TokenizedPaymentApi $paymentApi, Credentials $credentials)
+    public function __construct(TokenizedPaymentApi $paymentApi)
     {
-        $this->paymentApi  = $paymentApi;
-        $this->credentials = $credentials;
+        $this->paymentApi = $paymentApi;
     }
 
-    /** Handle bKash redirect callback: verify signature, execute payment, dispatch events. */
+    /** Handle bKash redirect callback: execute payment, dispatch events.
+     *  ponytail: no signature check — bKash's callback signing scheme is undocumented.
+     *  The execute API is the verification: server-to-server, single-use per paymentID,
+     *  only completes for a genuinely paid payment. If bKash ever documents the scheme,
+     *  re-add validation in front of execute(). */
     public function handle(Request $request)
     {
         $status    = $request->query('status');
@@ -30,12 +30,6 @@ class CallbackController extends Controller
 
         if (!$paymentId) {
             return $this->failure('Missing paymentID');
-        }
-
-        $appSecret = $this->credentials->get($account)['app_secret'] ?? '';
-
-        if (!$appSecret || !CallbackSignature::validate($request->query->all(), $appSecret)) {
-            return $this->failure('Invalid callback signature');
         }
 
         if ($status !== 'success') {

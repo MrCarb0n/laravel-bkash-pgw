@@ -16,7 +16,7 @@ bKash PGW (Tokenized Checkout) integration for Laravel — payments, refunds, ag
 - **Agreements** — saved-wallet mandates for PIN-only recurring charges
 - **Payouts** — B2C disbursement and B2B merchant transfers (initiate/disburse/query)
 - **Webhooks** — AWS SNS signature verification, auto-subscription, event dispatch
-- **Callbacks** — HMAC-SHA256 signature validation on redirect callbacks
+- **Callbacks** — redirect handler executes the payment and fires events
 - **Token cache** — one grant per account, auto-refresh, lock against duplicate grants
 - **Error codes** — 150+ bKash codes mapped to readable messages
 
@@ -71,7 +71,7 @@ $response = Bkash::payment()->create([
 return redirect($response['bkashURL']);
 ```
 
-The `/bkash/callback` route verifies the signature, executes the payment, and fires `PaymentCompleted` / `PaymentFailed`. Fulfil orders in a listener:
+The `/bkash/callback` route executes the payment and fires `PaymentCompleted` / `PaymentFailed`. Verification is the execute call itself: server-to-server, single-use per paymentID. Fulfil orders in a listener:
 
 ```php
 // app/Providers/EventServiceProvider.php

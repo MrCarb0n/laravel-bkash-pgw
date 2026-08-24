@@ -32,7 +32,9 @@ Redirect the user to `bkashURL`.
 
 ## Callback
 
-The `/bkash/callback` route is registered automatically. On `status=success` it verifies the HMAC-SHA256 signature, executes the payment, and fires events.
+The `/bkash/callback` route is registered automatically. On `status=success` it executes the payment and fires events.
+
+There is no callback signature check: bKash's callback signing scheme is undocumented. The execute API is the verification — it is a server-to-server, single-use call that only completes for a genuinely paid paymentID.
 
 Override the pages by publishing views:
 
