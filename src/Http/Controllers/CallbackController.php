@@ -1,0 +1,68 @@
+<?php
+
+namespace Tiash\LaravelBkash\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Tiash\LaravelBkash\Api\TokenizedPaymentApi;
+use Tiash\LaravelBkash\Auth\Credentials;
+use Tiash\LaravelBkash\Events\PaymentCompleted;
+use Tiash\LaravelBkash\Events\PaymentFailed;
+use Tiash\LaravelBkash\Security\CallbackSignature;
+
+class CallbackController extends Controller
+{
+    private $paymentApi;
+    private $credentials;
+
+    public function __construct(TokenizedPaymentApi $paymentApi, Credentials $credentials)
+    {
+        $this->paymentApi  = $paymentApi;
+        $this->credentials = $credentials;
+    }
+
+    /** Handle bKash redirect callback: verify signature, execute payment, dispatch events. */
+    public function handle(Request $request)
+    {
+        $status    = $request->query('status');
+        $paymentId = $request->query('paymentID');
+
+        if (!$paymentId) {
+            return $this->failure('Missing paymentID');
+        }
+
+        $appSecret = $this->credentials->get('default')['app_secret'];
+
+        if (!CallbackSignature::validate($request->query->all(), $appSecret)) {
+            return $this->failure('Invalid callback signature');
+        }
+
+        if ($status !== 'success') {
+            return $this->failure($status === 'cancel' ? 'Payment cancelled' : 'Payment failed');
+        }
+
+        try {
+            $response = $this->paymentApi->execute($paymentId);
+        } catch (\Throwable $e) {
+            return $this->failure($e->getMessage());
+        }
+
+        if (($response['transactionStatus'] ?? '') === 'Completed') {
+            event(new PaymentCompleted($response));
+            return $this->success('Payment successful', $response['trxID'] ?? null);
+        }
+
+        event(new PaymentFailed($response));
+        return $this->failure($response['statusMessage'] ?? 'Payment execution failed');
+    }
+
+    private function success(string $message, ?string $trxId = null)
+    {
+        return view('bkash::success', compact('message', 'trxId'));
+    }
+
+    private function failure(string $message, ?string $trxId = null)
+    {
+        return view('bkash::failed', compact('message', 'trxId'));
+    }
+}
