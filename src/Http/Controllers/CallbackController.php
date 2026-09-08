@@ -42,7 +42,11 @@ class CallbackController extends Controller
             return $this->failure($e->getMessage());
         }
 
-        if (($response['transactionStatus'] ?? '') === 'Completed') {
+        // Agreement executions report agreementStatus instead of transactionStatus.
+        $completed = ($response['transactionStatus'] ?? '') === 'Completed'
+            || ($response['agreementStatus'] ?? '') === 'Completed';
+
+        if ($completed) {
             event(new PaymentCompleted($response));
             return $this->success('Payment successful', $response['trxID'] ?? null);
         }
