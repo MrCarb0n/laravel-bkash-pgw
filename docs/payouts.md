@@ -1,5 +1,12 @@
 # Payouts
 
+Endpoints (per [bKash docs](https://developer.bka.sh/docs/b2b-payout-1)):
+
+- B2C: `POST {checkout-host}/{version}/checkout/payment/b2cPayment`
+- B2B: `POST {host}/{version}/tokenized/payout/{initiate,b2b,query}`
+
+The checkout host is configured separately (`checkout_urls`, env `BKASH_CHECKOUT_*_BASE_URL`) because B2C belongs to the Checkout API family, not Tokenized.
+
 ## B2C — send money to a wallet
 
 ```php

@@ -15,7 +15,7 @@ First release.
 - Payments: create, execute (idempotent), query status, search by trxID; forwards `merchantAssociationInfo` when provided
 - Refunds: full or partial (up to 10 per transaction) with refund status lookup, via documented v2 endpoints
 - Agreements: create (mode 0000), execute via shared `/checkout/execute`, status
-- Payouts: B2C disbursement; B2B initiate, disburse, query, and one-call workflow
+- Payouts: B2C disbursement on the Checkout host; B2B initiate, disburse, query, and one-call workflow (paths verified live against sandbox)
 - Configurable API base URLs (`base_urls` + `BKASH_*_BASE_URL` env overrides)
 - SNS webhook endpoint: RSA-SHA1 signature verification, certificate host allowlist, MessageId deduplication, automatic subscription confirmation
 - Redirect callback endpoint: executes the payment (single-use execute call is the verification), multi-account support via `account` query parameter

@@ -11,6 +11,12 @@ return [
         'production' => env('BKASH_PRODUCTION_BASE_URL', 'https://tokenized.pay.bka.sh'),
     ],
 
+    // Host family for the Checkout API (B2C payout); Tokenized uses base_urls above.
+    'checkout_urls' => [
+        'sandbox'    => env('BKASH_CHECKOUT_SANDBOX_BASE_URL', 'https://checkout.sandbox.bka.sh'),
+        'production' => env('BKASH_CHECKOUT_PRODUCTION_BASE_URL', 'https://checkout.pay.bka.sh'),
+    ],
+
     'callback_url' => env('BKASH_CALLBACK_URL'),
 
     'accounts' => [

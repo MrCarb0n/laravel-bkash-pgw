@@ -14,20 +14,24 @@ class PayoutApi
     private $tokenManager;
     private $credentials;
     private $baseUrl;
+    private $checkoutBase;
 
     public function __construct(
         BkashClientInterface $client,
         TokenManager $tokenManager,
         Credentials $credentials,
-        string $baseUrl
+        string $baseUrl,
+        string $checkoutBase
     ) {
         $this->client       = $client;
         $this->tokenManager = $tokenManager;
         $this->credentials  = $credentials;
         $this->baseUrl      = rtrim($baseUrl, '/');
+        $this->checkoutBase = rtrim($checkoutBase, '/');
     }
 
-    /** Send funds real-time to a beneficiary wallet (B2C). */
+    /** Send funds real-time to a beneficiary wallet (B2C).
+     *  POST {checkout-host}/{version}/checkout/payment/b2cPayment */
     public function disburse(string $receiver, $amount, string $reference, string $currency = 'BDT', string $account = 'default'): array
     {
         $payload = [
@@ -38,13 +42,14 @@ class PayoutApi
         ];
 
         return $this->client->post(
-            $this->baseUrl . '/checkout/payment/b2cPayment',
+            $this->checkoutBase . '/checkout/payment/b2cPayment',
             $payload,
             $this->authHeaders($account)
         );
     }
 
-    /** Send funds to another business wallet (B2B). Requires payoutID from bKash. */
+    /** Send funds to another business wallet (B2B). Requires payoutID from bKash.
+     *  POST {host}/{version}/tokenized/payout/b2b */
     public function disburseB2B(string $payoutId, string $receiver, $amount, string $reference, string $currency = 'BDT', string $account = 'default'): array
     {
         $payload = [
@@ -56,13 +61,14 @@ class PayoutApi
         ];
 
         return $this->client->post(
-            $this->baseUrl . '/tokenized/payout/b2b',
+            $this->baseUrl . '/payout/b2b',
             $payload,
             $this->authHeaders($account)
         );
     }
 
-    /** Initiate a B2B payout — returns payoutID required for disburseB2B. */
+    /** Initiate a B2B payout — returns payoutID required for disburseB2B.
+     *  POST {host}/{version}/tokenized/payout/initiate */
     public function initiateB2B(string $type = 'B2B', string $reference = '', string $account = 'default'): array
     {
         $payload = [
@@ -73,19 +79,21 @@ class PayoutApi
         }
 
         return $this->client->post(
-            $this->baseUrl . '/tokenized/payout/initiate',
+            $this->baseUrl . '/payout/initiate',
             $payload,
             $this->authHeaders($account)
         );
     }
 
-    /** Query status of a B2B payout by payoutID. */
+    /** Query status of a B2B payout by payoutID.
+     *  ponytail: query path inferred from the /tokenized/payout/ family pattern —
+     *  docs confirm a Query Payout API exists but don't print its URL. */
     public function queryB2B(string $payoutId, string $account = 'default'): array
     {
         $payload = ['payoutID' => $payoutId];
 
         return $this->client->post(
-            $this->baseUrl . '/tokenized/payout/query',
+            $this->baseUrl . '/payout/query',
             $payload,
             $this->authHeaders($account)
         );

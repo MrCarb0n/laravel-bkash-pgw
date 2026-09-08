@@ -143,12 +143,24 @@ class BkashServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(PayoutApi::class, function ($app) use ($baseUrl) {
+        $checkoutBase = function ($app) {
+            $cfg = $app['config']['bkash'];
+            $env = $cfg['sandbox'] ? 'sandbox' : 'production';
+
+            $host = rtrim($cfg['checkout_urls'][$env] ?? ($cfg['sandbox']
+                ? 'https://checkout.sandbox.bka.sh'
+                : 'https://checkout.pay.bka.sh'), '/');
+
+            return "{$host}/{$cfg['api_version']}";
+        };
+
+        $this->app->singleton(PayoutApi::class, function ($app) use ($baseUrl, $checkoutBase) {
             return new PayoutApi(
                 $app[BkashClientInterface::class],
                 $app[TokenManager::class],
                 $app[Credentials::class],
-                $baseUrl($app)
+                $baseUrl($app),
+                $checkoutBase($app)
             );
         });
 

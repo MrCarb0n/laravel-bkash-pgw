@@ -6,6 +6,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Tiash\LaravelBkash\Api\AgreementApi;
+use Tiash\LaravelBkash\Api\PayoutApi;
 use Tiash\LaravelBkash\Api\RefundApi;
 use Tiash\LaravelBkash\Auth\Credentials;
 use Tiash\LaravelBkash\Auth\TokenCache;
@@ -156,6 +157,66 @@ class ApiContractsTest extends TestCase
 
         $last = $this->handler->getLastRequest();
         $this->assertSame('/v1.2.0-beta/tokenized/checkout/execute', $last->getUri()->getPath());
+    }
+
+    private function makePayoutApi(GuzzleClient $client): PayoutApi
+    {
+        return new PayoutApi(
+            $client,
+            $this->makeTokenManager($client),
+            $this->credentials(),
+            'https://tokenized.sandbox.bka.sh/v1.2.0-beta/tokenized',
+            'https://checkout.sandbox.bka.sh/v1.2.0-beta'
+        );
+    }
+
+    public function test_b2c_posts_to_checkout_host(): void
+    {
+        $client = $this->makeClient();
+        $api = $this->makePayoutApi($client);
+        $this->primeToken();
+        $this->handler->append(new Response(200, [], json_encode([
+            'trxID'             => 'TRX1',
+            'transactionStatus' => 'Completed',
+        ])));
+
+        $api->disburse('01700000000', 500, 'INV1');
+
+        $last = $this->handler->getLastRequest();
+        $this->assertSame('checkout.sandbox.bka.sh', $last->getUri()->getHost());
+        $this->assertSame('/v1.2.0-beta/checkout/payment/b2cPayment', $last->getUri()->getPath());
+    }
+
+    public function test_b2b_paths_have_no_doubled_tokenized_segment(): void
+    {
+        $client = $this->makeClient();
+        $api = $this->makePayoutApi($client);
+        $this->primeToken();
+
+        $this->handler->append(new Response(200, [], json_encode([
+            'payoutID' => 'PO1', 'statusCode' => '0000',
+        ])));
+        $api->initiateB2B();
+        $this->assertSame(
+            '/v1.2.0-beta/tokenized/payout/initiate',
+            $this->handler->getLastRequest()->getUri()->getPath()
+        );
+
+        $this->handler->append(new Response(200, [], json_encode([
+            'trxID' => 'TRX1', 'transactionStatus' => 'Completed',
+        ])));
+        $api->disburseB2B('PO1', '01700000001', 1000, 'INV1');
+        $this->assertSame(
+            '/v1.2.0-beta/tokenized/payout/b2b',
+            $this->handler->getLastRequest()->getUri()->getPath()
+        );
+
+        $this->handler->append(new Response(200, [], json_encode(['transactionStatus' => 'Initiated'])));
+        $api->queryB2B('PO1');
+        $this->assertSame(
+            '/v1.2.0-beta/tokenized/payout/query',
+            $this->handler->getLastRequest()->getUri()->getPath()
+        );
     }
 
     public function test_refresh_token_sends_full_credentials(): void
