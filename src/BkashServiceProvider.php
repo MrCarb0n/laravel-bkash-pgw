@@ -26,16 +26,16 @@ class BkashServiceProvider extends ServiceProvider
         ], 'bkash-config');
 
         $this->publishes([
-            __DIR__ . '/routes/bkash.php' => base_path('routes/bkash.php'),
+            __DIR__ . '/../routes/bkash.php' => base_path('routes/bkash.php'),
         ], 'bkash-routes');
 
         $this->publishes([
-            __DIR__ . '/Views' => resource_path('views/vendor/bkash'),
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/bkash'),
         ], 'bkash-views');
 
-        $this->loadViewsFrom(__DIR__ . '/Views', 'bkash');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'bkash');
 
-        $this->loadRoutesFrom(__DIR__ . '/routes/bkash.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/bkash.php');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
