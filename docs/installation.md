@@ -30,7 +30,7 @@ php artisan vendor:publish --tag=bkash-views
 
 ## Configuration
 
-Add to `.env`:
+Copy every variable from the package's [.env.example](../.env.example) into your app's `.env`, then fill in your credentials:
 
 ```env
 BKASH_SANDBOX=true
@@ -41,7 +41,7 @@ BKASH_PASSWORD=your_sandbox_password
 BKASH_CALLBACK_URL=https://yourdomain.com/bkash/callback
 ```
 
-Sandbox credentials are available at [developer.bka.sh](https://developer.bka.sh) under Tokenized Checkout → Sandbox.
+Sandbox credentials are available at [developer.bka.sh](https://developer.bka.sh) under Tokenized Checkout → Sandbox. The `.env.example` also documents the optional host overrides and the production swap.
 
 The published `config/bkash.php` reads these via `env()`:
 
