@@ -34,24 +34,13 @@ composer require mrcarb0n/laravel-bkash-pgw
 php artisan bkash:install
 ```
 
-Add credentials to `.env`:
-
-```env
-BKASH_SANDBOX=true
-BKASH_APP_KEY=your_sandbox_app_key
-BKASH_APP_SECRET=your_sandbox_app_secret
-BKASH_USERNAME=your_sandbox_username
-BKASH_PASSWORD=your_sandbox_password
-BKASH_CALLBACK_URL=https://yourdomain.com/bkash/callback
-```
+Copy the variables from [.env.example](.env.example) into your app's `.env` and fill in your sandbox credentials — see [docs/installation.md](docs/installation.md).
 
 Verify connectivity:
 
 ```bash
 php artisan bkash:test-sandbox
 ```
-
-See [docs/installation.md](docs/installation.md) for details and multiple-account setup.
 
 ## Quick start
 
@@ -71,16 +60,7 @@ $response = Bkash::payment()->create([
 return redirect($response['bkashURL']);
 ```
 
-The `/bkash/callback` route executes the payment and fires `PaymentCompleted` / `PaymentFailed`. Verification is the execute call itself: server-to-server, single-use per paymentID. Fulfil orders in a listener:
-
-```php
-// app/Providers/EventServiceProvider.php
-protected $listen = [
-    \Tiash\LaravelBkash\Events\PaymentCompleted::class => [
-        \App\Listeners\FulfillOrder::class,
-    ],
-];
-```
+Fulfil orders by listening for `PaymentCompleted` — full flow in [docs/payments.md](docs/payments.md).
 
 ## Documentation
 
@@ -98,7 +78,7 @@ protected $listen = [
 ## Testing
 
 ```bash
-composer test                                    # 35 tests
+composer test                                    # 42 tests
 vendor/bin/phpstan analyse --no-progress         # static analysis
 php artisan bkash:test-sandbox                   # live sandbox smoke test
 ```
