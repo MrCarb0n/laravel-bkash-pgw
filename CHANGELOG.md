@@ -17,7 +17,7 @@ First release.
 - Agreements: create, execute, status
 - Payouts: B2C disbursement; B2B initiate, disburse, query, and one-call workflow
 - SNS webhook endpoint: RSA-SHA1 signature verification, certificate host allowlist, MessageId deduplication, automatic subscription confirmation
-- Redirect callback endpoint: HMAC-SHA256 signature validation, multi-account support via `account` query parameter
+- Redirect callback endpoint: executes the payment (single-use execute call is the verification), multi-account support via `account` query parameter
 - Events: `PaymentCompleted`, `PaymentFailed`, `RefundCompleted`, `WebhookReceived`
 - Error code map: 150+ bKash error codes translated to readable messages
 - Webhook transaction type constants with helpers (`isPayment`, `isM2M`, `isB2B`)

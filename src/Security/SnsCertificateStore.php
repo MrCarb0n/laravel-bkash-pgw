@@ -3,6 +3,7 @@
 namespace Tiash\LaravelBkash\Security;
 
 use Illuminate\Contracts\Cache\Repository;
+use Tiash\LaravelBkash\Exceptions\SignatureException;
 
 class SnsCertificateStore
 {
@@ -26,7 +27,7 @@ class SnsCertificateStore
 
         $content = @file_get_contents($url);
         if ($content === false) {
-            throw new \RuntimeException("Failed to download SNS certificate from {$url}");
+            throw new SignatureException("Failed to download SNS certificate from {$url}");
         }
 
         $this->cache->put($key, $content, $this->ttl);

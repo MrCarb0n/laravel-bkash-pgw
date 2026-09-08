@@ -10,6 +10,26 @@ bKash delivers real-time payment notifications via AWS SNS to a listener URL you
 
 The webhook route is registered by `bkash:install`. It must be publicly reachable over HTTPS.
 
+## CSRF exclusion (required)
+
+bKash POSTs from outside your app, so exclude the route from CSRF verification or every notification gets a 419:
+
+Laravel 11+ (`bootstrap/app.php`):
+
+```php
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->validateCsrfTokens(except: ['bkash/webhook']);
+})
+```
+
+Laravel 10 and below (`app/Http/Middleware/VerifyCsrfToken.php`):
+
+```php
+protected $except = [
+    'bkash/webhook',
+];
+```
+
 ## What the package does per request
 
 1. Parses the SNS envelope
