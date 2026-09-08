@@ -39,20 +39,34 @@ class CallbackController extends Controller
         try {
             $response = $this->paymentApi->execute($paymentId, $account);
         } catch (\Throwable $e) {
-            return $this->failure($e->getMessage());
+            // Execute may have timed out after bKash committed the payment.
+            // Verify via query before reporting failure — never show "failed"
+            // for money that actually moved.
+            try {
+                $response = $this->paymentApi->query($paymentId, $account);
+            } catch (\Throwable) {
+                return $this->failure($e->getMessage());
+            }
+
+            if (!$this->isCompleted($response)) {
+                return $this->failure($e->getMessage());
+            }
         }
 
         // Agreement executions report agreementStatus instead of transactionStatus.
-        $completed = ($response['transactionStatus'] ?? '') === 'Completed'
-            || ($response['agreementStatus'] ?? '') === 'Completed';
-
-        if ($completed) {
+        if ($this->isCompleted($response)) {
             event(new PaymentCompleted($response));
             return $this->success('Payment successful', $response['trxID'] ?? null);
         }
 
         event(new PaymentFailed($response));
         return $this->failure($response['statusMessage'] ?? 'Payment execution failed');
+    }
+
+    private function isCompleted(array $response): bool
+    {
+        return ($response['transactionStatus'] ?? '') === 'Completed'
+            || ($response['agreementStatus'] ?? '') === 'Completed';
     }
 
     private function success(string $message, ?string $trxId = null)
