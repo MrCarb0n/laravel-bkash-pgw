@@ -21,9 +21,4 @@ class HeaderFactory
             'X-App-Key'     => $appKey,
         ];
     }
-
-    public static function tokenRefresh(string $idToken, string $appKey): array
-    {
-        return self::idToken($idToken, $appKey);
-    }
 }

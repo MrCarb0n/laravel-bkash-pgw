@@ -13,21 +13,22 @@ class RefundApi
     private $client;
     private $tokenManager;
     private $credentials;
-    private $baseUrl;
+    private $host;
 
     public function __construct(
         BkashClientInterface $client,
         TokenManager $tokenManager,
         Credentials $credentials,
-        string $baseUrl
+        string $host
     ) {
         $this->client       = $client;
         $this->tokenManager = $tokenManager;
         $this->credentials  = $credentials;
-        $this->baseUrl      = rtrim($baseUrl, '/');
+        $this->host         = rtrim($host, '/');
     }
 
-    /** Reverse a completed transaction, fully or partially. */
+    /** Reverse a completed transaction, fully or partially (up to 10 partial refunds).
+     *  POST /v2/tokenized-checkout/refund/payment/transaction */
     public function refund(
         string $paymentId,
         string $trxId,
@@ -37,26 +38,27 @@ class RefundApi
         string $account = 'default'
     ): array {
         $payload = [
-            'paymentID' => $paymentId,
-            'trxID'     => $trxId,
-            'amount'    => Amount::format($amount),
-            'reason'    => $reason,
-            'sku'       => $sku,
+            'paymentId'    => $paymentId,
+            'trxId'        => $trxId,
+            'refundAmount' => Amount::format($amount),
+            'sku'          => $sku,
+            'reason'       => $reason,
         ];
 
-        return $this->client->post($this->baseUrl . '/checkout/payment/refund', $payload, $this->authHeaders($account));
+        return $this->client->post($this->host . '/v2/tokenized-checkout/refund/payment/transaction', $payload, $this->authHeaders($account));
     }
 
-    /** Check status of a previous refund without re-triggering it. */
+    /** Check status of previous refunds without re-triggering them.
+     *  POST /v2/tokenized-checkout/refund/payment/status */
     public function status(string $paymentId, string $trxId, string $account = 'default'): array
     {
         $payload = [
-            'paymentID' => $paymentId,
-            'trxID'     => $trxId,
+            'paymentId' => $paymentId,
+            'trxId'     => $trxId,
         ];
 
         return $this->client->post(
-            $this->baseUrl . '/checkout/payment/refund/status',
+            $this->host . '/v2/tokenized-checkout/refund/payment/status',
             $payload,
             $this->authHeaders($account)
         );

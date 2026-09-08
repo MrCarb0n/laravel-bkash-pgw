@@ -29,24 +29,26 @@ class AgreementApi
         $this->callbackUrl  = $callbackUrl;
     }
 
-    /** Create an agreement (mandate) request; redirect payer to returned bkashURL. */
+    /** Create an agreement (mandate) request; redirect payer to returned bkashURL.
+     *  Mode 0000 per https://developer.bka.sh/docs/create-agreement */
     public function create(array $data, string $account = 'default'): array
     {
         $payload = [
-            'mode'           => '0001',
+            'mode'           => '0000',
             'payerReference' => $data['payerReference'] ?? '',
             'callbackURL'    => $data['callbackURL'] ?? $this->callbackUrl,
         ];
 
-        return $this->client->post($this->baseUrl . '/checkout/agreement/create', $payload, $this->authHeaders($account));
+        return $this->client->post($this->baseUrl . '/checkout/create', $payload, $this->authHeaders($account));
     }
 
-    /** Finalize an agreement after payer confirmation. */
+    /** Finalize an agreement after payer confirmation.
+     *  Same execute endpoint as payments per https://developer.bka.sh/docs/execute-agreement */
     public function execute(string $paymentId, string $account = 'default'): array
     {
         $payload = ['paymentID' => $paymentId];
 
-        return $this->client->post($this->baseUrl . '/checkout/agreement/execute', $payload, $this->authHeaders($account));
+        return $this->client->post($this->baseUrl . '/checkout/execute', $payload, $this->authHeaders($account));
     }
 
     /** Check the current status of an agreement. */

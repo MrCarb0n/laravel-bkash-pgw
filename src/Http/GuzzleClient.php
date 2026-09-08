@@ -59,7 +59,6 @@ class GuzzleClient implements BkashClientInterface
             '/checkout/execute',
             '/checkout/payment/status',
             '/checkout/general/searchTransaction',
-            '/checkout/agreement/execute',
             '/checkout/agreement/status',
         ];
         $isIdempotent = $method === 'GET' || in_array($endpoint, $idempotentEndpoints, true);

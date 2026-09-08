@@ -51,16 +51,18 @@ class BkashServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/bkash.php', 'bkash');
 
-        $baseUrl = function ($app) {
+        $host = function ($app) {
             $cfg = $app['config']['bkash'];
             $env = $cfg['sandbox'] ? 'sandbox' : 'production';
 
             // Fallback keeps configs published before base_urls existed working.
-            $host = rtrim($cfg['base_urls'][$env] ?? ($cfg['sandbox']
+            return rtrim($cfg['base_urls'][$env] ?? ($cfg['sandbox']
                 ? 'https://tokenized.sandbox.bka.sh'
                 : 'https://tokenized.pay.bka.sh'), '/');
+        };
 
-            return "{$host}/{$cfg['api_version']}/tokenized";
+        $baseUrl = function ($app) use ($host) {
+            return "{$host($app)}/{$app['config']['bkash']['api_version']}/tokenized";
         };
 
         $this->app->singleton(ResponseNormalizer::class);
@@ -121,12 +123,13 @@ class BkashServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(RefundApi::class, function ($app) use ($baseUrl) {
+        // Refund uses the unversioned v2 endpoints, so it takes the host, not the versioned base.
+        $this->app->singleton(RefundApi::class, function ($app) use ($host) {
             return new RefundApi(
                 $app[BkashClientInterface::class],
                 $app[TokenManager::class],
                 $app[Credentials::class],
-                $baseUrl($app)
+                $host($app)
             );
         });
 

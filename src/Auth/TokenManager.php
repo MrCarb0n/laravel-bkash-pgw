@@ -43,9 +43,13 @@ class TokenManager
         }
 
         $creds = $this->credentials->get($account);
-        $headers = HeaderFactory::tokenRefresh($cached['id_token'], $creds['app_key']);
+        $headers = HeaderFactory::grant($creds['username'], $creds['password']);
 
-        $payload = ['refresh_token' => $cached['refresh_token']];
+        $payload = [
+            'app_key'       => $creds['app_key'],
+            'app_secret'    => $creds['app_secret'],
+            'refresh_token' => $cached['refresh_token'],
+        ];
         $response = $this->client->post($this->baseUrl . '/checkout/token/refresh', $payload, $headers);
 
         if (isset($response['id_token'])) {

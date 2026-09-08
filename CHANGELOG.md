@@ -13,8 +13,8 @@ First release.
 
 - Token grant and refresh with shared per-account cache (TTL = `expires_in` − buffer, lock against duplicate grants)
 - Payments: create, execute (idempotent), query status, search by trxID
-- Refunds: full or partial (up to 10 per transaction) with refund status lookup
-- Agreements: create, execute, status
+- Refunds: full or partial (up to 10 per transaction) with refund status lookup, via documented v2 endpoints
+- Agreements: create (mode 0000), execute via shared `/checkout/execute`, status
 - Payouts: B2C disbursement; B2B initiate, disburse, query, and one-call workflow
 - SNS webhook endpoint: RSA-SHA1 signature verification, certificate host allowlist, MessageId deduplication, automatic subscription confirmation
 - Redirect callback endpoint: executes the payment (single-use execute call is the verification), multi-account support via `account` query parameter

@@ -54,6 +54,10 @@ class TokenizedPaymentApi
             $payload['agreementID'] = $data['agreementID'];
         }
 
+        if (!empty($data['merchantAssociationInfo'])) {
+            $payload['merchantAssociationInfo'] = $data['merchantAssociationInfo'];
+        }
+
         return $this->client->post($this->baseUrl . '/checkout/create', $payload, $this->authHeaders($account));
     }
 

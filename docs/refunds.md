@@ -4,14 +4,17 @@
 
 ```php
 $refund = Bkash::refund()->refund(
-    $paymentId,          // from create response
-    $trxId,              // from execute response / webhook
-    50.00,               // amount
+    $paymentId,          // from create response  -> sent as paymentId
+    $trxId,              // from execute/webhook  -> sent as trxId
+    50.00,               // amount                -> sent as refundAmount ("50.00")
     'Customer request',  // reason (max 255 chars)
-    'SKU_123',           // sku (max 255 chars, optional)
+    'SKU_123',           // sku (max 255 chars)
     'secondary'          // account (optional)
 );
 ```
+
+Endpoint: `POST /v2/tokenized-checkout/refund/payment/transaction`
+([docs](https://developer.bka.sh/docs/refund-transaction-4))
 
 Response:
 
@@ -33,6 +36,9 @@ If the API times out (30s), call `status()` — do not blindly retry.
 ```php
 $status = Bkash::refund()->status($paymentId, $trxId);
 ```
+
+Endpoint: `POST /v2/tokenized-checkout/refund/payment/status`
+([docs](https://developer.bka.sh/docs/refund-status-3))
 
 Response contains a list of every individual refund:
 
