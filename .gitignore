@@ -13,3 +13,8 @@ PLAN.md
 .php-cs-fixer.cache
 .phpstan-cache/
 .DS_Store
+
+# AI agents
+/.claude/
+/AGENTS.md
+/CLAUDE.md
